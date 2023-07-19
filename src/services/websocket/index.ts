@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import IoSocket from "socket.io";
 import SocketServiceNotifications from "./notifications";
 
@@ -23,11 +24,8 @@ class SocketService {
     this.io.on("connection", (socket) => {
       this.NotificationService.events(socket);
       this.NotificationService.notification(socket);
-      const id = "Williams";
-
-      console.log("Usuarios conectados", this.connectedUsers);
+      const id = randomUUID();
       this.connectedUsers[id] = socket.id;
-
       socket.on("disconnect", () => {
         console.log("desconectado id " + socket.id);
         delete this.connectedUsers[id];

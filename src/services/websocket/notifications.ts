@@ -1,24 +1,30 @@
 import IoSocket from "socket.io";
-interface IMessage {
-  id: string;
+interface IModuleNotification {
   title: string;
-  summary: string;
+  new: boolean;
+  date: Date;
 }
 
+const modules: IModuleNotification[] = [];
 class SocketServiceNotifications {
-  private static instance: SocketServiceNotifications;
-
   public events(socket: IoSocket.Socket): void {
     socket.on("message", (message: string) => {
       console.log("recebi", message);
-      //socket.broadcast.emit("message", message); //  Envia pra todo mundo, exceto o emissor
+      socket.broadcast.emit("message", message); //  Envia pra todo mundo, exceto o emissor
       socket.emit("message", message);
     });
   }
   public notification(socket: IoSocket.Socket): void {
     socket.on("notification-header", (message: string) => {
-      console.log("recebi a notificação", message);
-      socket.broadcast.emit("message", message);
+      const newNotification: IModuleNotification = {
+        title: message,
+        new: true,
+        date: new Date(),
+      };
+
+      modules.push(newNotification);
+      socket.to(socket.id).emit("notification-header", modules);
+      socket.broadcast.emit("notification-header", modules);
     });
   }
 }
